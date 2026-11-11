@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="si"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SHIVA MOTORS</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#111827"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shiva Motors">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f5f2;--card:#fff;--tx:#1d1d1b;--mut:#6b6b66;--bd:#e2e0da;--ac:#c2410c;--ok:#15803d;--bad:#b91c1c}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#212120;--tx:#f1f0ec;--mut:#9a9a93;--bd:#34332f;--ac:#fb923c;--ok:#4ade80;--bad:#f87171}}
+:root[data-theme="dark"]{--bg:#161615;--card:#212120;--tx:#f1f0ec;--mut:#9a9a93;--bd:#34332f;--ac:#fb923c;--ok:#4ade80;--bad:#f87171}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Noto Sans Sinhala","Iskoola Pota",sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:12px 14px 40px}
+h1{font-size:20px;margin:6px 0 2px;letter-spacing:.5px}h1 span{color:var(--ac)}
+.sub{color:var(--mut);font-size:13px;margin-bottom:10px}
+nav{display:flex;gap:6px;margin:10px 0;overflow-x:auto}
+nav button,.seg button{flex:1;white-space:nowrap;padding:9px 10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;cursor:pointer}
+nav button.on,.seg button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.k{font-size:12px;color:var(--mut)}.v{font-size:17px;font-weight:700}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+label{display:block;font-size:12px;color:var(--mut);margin:10px 0 3px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+.seg{display:flex;gap:6px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)}
+.row:last-child{border:0}
+.bar{height:6px;background:var(--bd);border-radius:4px;margin-top:4px}.bar i{display:block;height:100%;background:var(--ac);border-radius:4px}
+.save{width:100%;margin-top:14px;padding:12px;border:0;border-radius:10px;background:var(--ac);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.del{background:none;border:0;color:var(--bad);cursor:pointer;font-size:13px}
+.hide{display:none}.msg{padding:10px;border-radius:10px;background:var(--card);border:1px dashed var(--bd);color:var(--mut);margin-bottom:10px}
+h3{margin:0 0 8px;font-size:15px}
+.wrap{padding-bottom:96px}
+.top{display:flex;align-items:center;gap:12px;padding:16px;margin:4px 0 14px;border-radius:18px;background:linear-gradient(135deg,#111827,#1f2937 60%,#7c2d12);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.logo{width:46px;height:46px;border-radius:12px;background:var(--ac);display:grid;place-items:center;font-weight:800;letter-spacing:1px;color:#fff;flex:none}
+.top h1{margin:0;font-size:19px;letter-spacing:2px;color:#fff}.top h1 span{color:#fb923c}
+.top .sub{margin:2px 0 0;color:#cbd5e1;font-size:12px}
+.card{border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);border-color:var(--bd)}
+.card h3{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut)}
+.grid{gap:10px}.grid>div{min-width:0;padding:10px;border-radius:12px;background:var(--bg);border-top:3px solid var(--bd)}
+.grid>div:nth-child(1){border-top-color:var(--ok)}.grid>div:nth-child(2){border-top-color:var(--bad)}.grid>div:nth-child(3){border-top-color:var(--ac)}
+.v{font-size:15px;word-break:break-word}
+nav{position:fixed;left:0;right:0;bottom:0;margin:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));gap:4px;background:var(--card);border-top:1px solid var(--bd);z-index:20;overflow:visible}
+nav button{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:var(--mut);font-size:11px;padding:6px 2px;border-radius:10px}
+nav button.on{background:none;color:var(--ac);font-weight:700}
+nav button *{pointer-events:none}nav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--ac);outline-offset:0;border-color:transparent}
+.save{box-shadow:0 4px 12px rgba(194,65,12,.3)}
+.row{align-items:center}
+#status{border-radius:12px}
+#login{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#111827,#1f2937 65%,#7c2d12);display:grid;place-items:center;padding:20px}
+#login form{width:100%;max-width:340px;background:var(--card);border-radius:18px;padding:22px}
+#login .logo{margin:0 auto 10px;width:56px;height:56px}#login h2{text-align:center;margin:0 0 6px;font-size:18px;letter-spacing:2px}
+#lerr{color:var(--bad);font-size:13px;min-height:18px;margin-top:8px;text-align:center}
+</style></head><body><div class="wrap">
+<header class="top"><div class="logo">SM</div><div><h1>SHIVA <span>MOTORS</span></h1><div class="sub">Garage Accounts &amp; Customer Records</div></div></header>
+<div id="status" class="msg">දත්ත ලෝඩ් වෙමින්...</div>
+<nav id="nav"><button data-t="home" class="on"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>සාරාංශය</span></button><button data-t="add"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>එකතු කරන්න</span></button><button data-t="cust"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-4 3.2-6 6.5-6s6 2 6.5 6M17 11a3 3 0 100-6M18 14c2.2.4 3.5 2.3 3.8 5"/></svg><span>පාරිභෝගිකයෝ</span></button><button data-t="rec"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span>වාර්තා</span></button></nav>
+
+<section id="v-home">
+<div class="card"><label style="margin-top:0">මාසය</label><input type="month" id="month"></div>
+<div class="card"><div class="grid">
+<div><div class="k">ආදායම</div><div class="v" id="s-in">0</div></div>
+<div><div class="k">වියදම</div><div class="v" id="s-out">0</div></div>
+<div><div class="k">ලාභය</div><div class="v" id="s-pf">0</div></div></div></div>
+<div class="card"><h3>වියදම් බෙදීම</h3><div id="cats"></div></div>
+<div class="card"><h3>ස්ටාෆ් පඩි</h3><div id="staff"></div></div>
+</section>
+
+<section id="v-add" class="hide"><div class="card">
+<div class="seg"><button data-ty="income" class="on">ආදායම (+)</button><button data-ty="expense">වියදම (-)</button></div>
+<label>දිනය</label><input type="date" id="f-date">
+<label>මුදල (Rs.)</label><input type="number" id="f-amt" inputmode="decimal" min="0">
+<label>වර්ගය</label><select id="f-cat"></select>
+<div id="g-staff" class="hide"><label>ස්ටාෆ් නම</label><input id="f-staff" list="staffnames"><datalist id="staffnames"></datalist></div>
+<div id="g-cust" class="hide">
+<label>පාරිභෝගික නම</label><input id="f-name" list="custnames"><datalist id="custnames"></datalist>
+<label>දුරකථන</label><input id="f-phone" inputmode="tel">
+</div>
+<div id="g-veh" class="hide"><label>වාහන අංකය</label><input id="f-veh" list="vehs"><datalist id="vehs"></datalist></div>
+<label>සටහන</label><textarea id="f-note" rows="2"></textarea>
+<button class="save" id="save">සේව් කරන්න</button>
+</div></section>
+
+<section id="v-cust" class="hide"><div class="card"><input id="q" placeholder="නම / අංකය / දුරකථනය සොයන්න"><div id="custlist" style="margin-top:8px"></div></div></section>
+<section id="v-rec" class="hide"><div class="card"><div id="reclist"></div></div><div class="card"><h3>Backup</h3><div class="k" style="margin-bottom:8px">දත්ත ගබඩා වෙන්නේ මේ ෆෝන් එකේ පමණයි. සතියකට වරක් backup එකක් ගන්න.</div>
+<button class="save" id="bk" style="margin-top:0">Backup ගන්න</button>
+<label>Backup එකකින් ප්‍රතිස්ථාපනය</label><input type="file" id="rs" accept=".json,application/json"></div></section>
+</div>
+<script>window.dbReady=new Promise(r=>{window._res=r});
+const $=s=>document.querySelector(s);
+const CATS={income:[["repair","අලුත්වැඩියා / සර්විස්"],["parts_sale","කොටස් විකිණීම"],["other_in","වෙනත් ආදායම"]],
+expense:[["wage","ස්ටාෆ් දවස් පඩි"],["food","ස්ටාෆ් කෑම බීම"],["parts","වාහන කොටස් (කස්ටමර් වැඩ)"],["ownveh","අනිත් වාහන වලට (වෙනත් වාහන)"],["bills","කුලී / විදුලි / වතුර"],["other_out","වෙනත් වියදම්"]]};
+const NAME={};Object.values(CATS).flat().forEach(([k,n])=>NAME[k]=n);
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const fmt=n=>"Rs. "+Math.round(n).toLocaleString("en-US");
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const obj=d=>Object.assign({id:d.id},typeof d.data==="function"?d.data():d.data);
+let db=null,entries=[],customers=[],type="income",tab="home",month=today().slice(0,7);
+
+function setStatus(t){const s=$("#status");s.textContent=t;s.classList.toggle("hide",!t)}
+$("#month").value=month;$("#f-date").value=today();
+$("#month").onchange=e=>{month=e.target.value||month;render()};
+$("#nav").onclick=e=>{const t=e.target.dataset.t;if(!t)return;tab=t;
+ document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+ ["home","add","cust","rec"].forEach(x=>$("#v-"+x).classList.toggle("hide",x!==t));render()};
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{type=b.dataset.ty;
+ document.querySelectorAll(".seg button").forEach(x=>x.classList.toggle("on",x===b));fillCats()});
+function fillCats(){$("#f-cat").innerHTML=CATS[type].map(([k,n])=>`<option value="${k}">${n}</option>`).join("");toggles()}
+function toggles(){const c=$("#f-cat").value;
+ $("#g-staff").classList.toggle("hide",c!=="wage");
+ $("#g-cust").classList.toggle("hide",type!=="income");
+ $("#g-veh").classList.toggle("hide",!(type==="income"||c==="parts"||c==="ownveh"))}
+$("#f-cat").onchange=toggles;fillCats();
+$("#q").oninput=render;
+
+function hash(s){let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))|0;return "c"+(h>>>0).toString(36)}
+async function save(){
+ if(!db){alert("දත්ත ගබඩාවට සම්බන්ධ වී නැත");return}
+ const amt=parseFloat($("#f-amt").value);if(!(amt>0)){alert("මුදල ඇතුළත් කරන්න");return}
+ const cat=$("#f-cat").value,date=$("#f-date").value||today();
+ const e={type,cat,amount:amt,date,note:$("#f-note").value.trim(),ts:Date.now()};
+ const veh=$("#f-veh").value.trim().toUpperCase();if(veh)e.vehicle=veh;
+ if(cat==="wage")e.staff=$("#f-staff").value.trim()||"නම නැත";
+ const name=$("#f-name").value.trim(),phone=$("#f-phone").value.trim();
+ if(type==="income"){e.customer=name;e.phone=phone}
+ try{
+  await db.collection("entries").add(e);
+  if(type==="income"&&(veh||phone||name)){
+   const key=veh||phone||name,id=hash(key.toLowerCase()),old=customers.find(c=>c.id===id)||{};
+   await db.doc("customers/"+id).set({name:name||old.name||"",phone:phone||old.phone||"",vehicle:veh||old.vehicle||"",
+    visits:(old.visits||0)+1,total:(old.total||0)+amt,last:date});
+  }
+  ["f-amt","f-note","f-staff","f-name","f-phone","f-veh"].forEach(i=>$("#"+i).value="");
+  setStatus("සේව් විය ✓");setTimeout(()=>setStatus(""),2000);
+ }catch(err){alert("සේව් කළ නොහැක. (View only ගිණුමකින් ලිවිය නොහැක.)")}
+}
+$("#save").onclick=save;
+async function delEntry(id){if(confirm("මේ වාර්තාව මකන්නද?")){try{await db.doc("entries/"+id).delete()}catch(e){alert("මකන්න අවසර නැත")}}}
+window.delEntry=delEntry;
+
+function render(){
+ const me=entries.filter(e=>(e.date||"").slice(0,7)===month);
+ const inc=me.filter(e=>e.type==="income").reduce((a,e)=>a+e.amount,0);
+ const exp=me.filter(e=>e.type==="expense");const out=exp.reduce((a,e)=>a+e.amount,0);
+ $("#s-in").textContent=fmt(inc);$("#s-out").textContent=fmt(out);
+ const pf=$("#s-pf");pf.textContent=fmt(inc-out);pf.className="v "+(inc-out>=0?"ok":"bad");
+ const by={};exp.forEach(e=>by[e.cat]=(by[e.cat]||0)+e.amount);
+ $("#cats").innerHTML=Object.keys(by).length?Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,v])=>
+  `<div style="margin-bottom:8px"><div class="row" style="padding:0;border:0"><span>${esc(NAME[k]||k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${out?v/out*100:0}%"></i></div></div>`).join(""):'<div class="k">වියදම් නැත</div>';
+ const w=exp.filter(e=>e.cat==="wage"),sm={};w.forEach(e=>{const s=sm[e.staff]||(sm[e.staff]={n:0,t:0});s.n++;s.t+=e.amount});
+ const names=Object.keys(sm);
+ $("#staff").innerHTML=`<div class="row"><span>පඩි ලැබූ ස්ටාෆ් ගණන</span><b>${names.length}</b></div><div class="row"><span>මුළු පඩි</span><b>${fmt(by.wage||0)}</b></div><div class="row"><span>කෑම බීම</span><b>${fmt(by.food||0)}</b></div>`
+  +names.map(n=>`<div class="row"><span>${esc(n)} <span class="k">(දින ${sm[n].n})</span></span><b>${fmt(sm[n].t)}</b></div>`).join("");
+ $("#staffnames").innerHTML=[...new Set(entries.filter(e=>e.staff).map(e=>e.staff))].map(n=>`<option value="${esc(n)}">`).join("");
+ $("#custnames").innerHTML=customers.filter(c=>c.name).map(c=>`<option value="${esc(c.name)}">`).join("");
+ $("#vehs").innerHTML=customers.filter(c=>c.vehicle).map(c=>`<option value="${esc(c.vehicle)}">`).join("");
+ const q=$("#q").value.trim().toLowerCase();
+ const cl=customers.filter(c=>!q||[c.name,c.phone,c.vehicle].join(" ").toLowerCase().includes(q)).sort((a,b)=>(b.last||"").localeCompare(a.last||""));
+ $("#custlist").innerHTML=cl.length?cl.map(c=>`<div class="row"><div><b>${esc(c.name||"නම නැත")}</b><div class="k">${esc(c.vehicle||"")} ${esc(c.phone||"")}</div></div><div style="text-align:right"><b>${fmt(c.total||0)}</b><div class="k">${c.visits||0} වතාවක් · ${esc(c.last||"")}</div></div></div>`).join(""):'<div class="k">පාරිභෝගිකයෝ නැත. ආදායමක් එකතු කරද්දී ඔටෝ සේව් වේ.</div>';
+ const rl=[...me].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.ts||0)-(a.ts||0));
+ $("#reclist").innerHTML=rl.length?rl.map(e=>`<div class="row"><div><b>${esc(NAME[e.cat]||e.cat)}</b> <span class="k">${esc(e.date)}</span><div class="k">${esc([e.staff,e.customer,e.vehicle,e.note].filter(Boolean).join(" · "))}</div></div><div style="text-align:right"><b class="${e.type==="income"?"ok":"bad"}">${e.type==="income"?"+":"-"}${fmt(e.amount)}</b><br><button class="del" onclick="delEntry('${e.id}')">මකන්න</button></div></div>`).join(""):'<div class="k">මේ මාසයේ වාර්තා නැත</div>';
+}
+
+(async()=>{
+ const t=setTimeout(()=>setStatus("දත්ත ගබඩාවට තවම සම්බන්ධ වී නැත. පසුව බලන්න."),10000);
+ try{db=await window.dbReady}catch(e){db=null}
+ if(!db){clearTimeout(t);setStatus("සම්බන්ධ වීමට claude.ai හි sign in වී ලින්ක් එක විවෘත කරන්න.");return}
+ let got=0;const ok=()=>{if(++got>=2){clearTimeout(t);setStatus("")}};
+ const er=()=>{clearTimeout(t);setStatus("දත්ත කියවීමේ දෝෂයක්")};
+ db.collection("entries").onSnapshot(s=>{entries=s.docs.map(obj);ok();render()},er);
+ db.collection("customers").onSnapshot(s=>{customers=s.docs.map(obj);ok();render()},er);
+})();
+render();
+</script><script>
+(()=>{
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+const K="shiva-motors-v1";let store={};
+try{store=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}
+const subs={},uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const persist=()=>{try{localStorage.setItem(K,JSON.stringify(store))}catch(e){alert("ෆෝන් එකේ ගබඩා කළ නොහැකි විය. Storage පිරී ඇත.")}};
+const snap=n=>({docs:Object.entries(store[n]||{}).map(([id,d])=>({id,data:()=>d}))});
+const fire=n=>(subs[n]||[]).forEach(f=>f(snap(n)));
+const put=(n,id,d)=>{(store[n]=store[n]||{})[id]=d;persist();fire(n)};
+window._res({
+ collection:n=>({add:async d=>put(n,uid(),d),onSnapshot:f=>{(subs[n]=subs[n]||[]).push(f);setTimeout(()=>f(snap(n)));return()=>{}}}),
+ doc:p=>{const[n,id]=p.split("/");return{set:async d=>put(n,id,d),delete:async()=>{if(store[n])delete store[n][id];persist();fire(n)}}}
+});
+document.getElementById("bk").onclick=()=>{const b=new Blob([JSON.stringify(store)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="shiva-motors-backup-"+today()+".json";a.click()};
+document.getElementById("rs").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+ try{const d=JSON.parse(await f.text());if(!d||typeof d!=="object"||Array.isArray(d))throw 0;
+  if(!confirm("දැනට ඇති දත්ත මේ backup එකෙන් ප්‍රතිස්ථාපනය වේ. ඉදිරියට යන්නද?"))return;
+  store=d;persist();["entries","customers"].forEach(fire)}catch(x){alert("වලංගු backup ෆයිල් එකක් නෙවෙයි")}e.target.value=""};
+})();
+</script>
+</body></html>

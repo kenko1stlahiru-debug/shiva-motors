@@ -51,146 +51,119 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ac);outline-offs
 #login form{width:100%;max-width:340px;background:var(--card);border-radius:18px;padding:22px}
 #login .logo{margin:0 auto 10px;width:56px;height:56px}#login h2{text-align:center;margin:0 0 6px;font-size:18px;letter-spacing:2px}
 #lerr{color:var(--bad);font-size:13px;min-height:18px;margin-top:8px;text-align:center}
-</style></head><body><div class="wrap">
-<header class="top"><div class="logo">SM</div><div><h1>SHIVA <span>MOTORS</span></h1><div class="sub">Garage Accounts &amp; Customer Records</div></div></header>
-<div id="status" class="msg">දත්ත ලෝඩ් වෙමින්...</div>
-<nav id="nav"><button data-t="home" class="on"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>සාරාංශය</span></button><button data-t="add"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>එකතු කරන්න</span></button><button data-t="cust"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-4 3.2-6 6.5-6s6 2 6.5 6M17 11a3 3 0 100-6M18 14c2.2.4 3.5 2.3 3.8 5"/></svg><span>පාරිභෝගිකයෝ</span></button><button data-t="rec"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span>වාර්තා</span></button></nav>
 
-<section id="v-home">
-<div class="card"><label style="margin-top:0">මාසය</label><input type="month" id="month"></div>
-<div class="card"><div class="grid">
-<div><div class="k">ආදායම</div><div class="v" id="s-in">0</div></div>
-<div><div class="k">වියදම</div><div class="v" id="s-out">0</div></div>
-<div><div class="k">ලාභය</div><div class="v" id="s-pf">0</div></div></div></div>
-<div class="card"><h3>වියදම් බෙදීම</h3><div id="cats"></div></div>
-<div class="card"><h3>ස්ටාෆ් පඩි</h3><div id="staff"></div></div>
-</section>
-
-<section id="v-add" class="hide"><div class="card">
-<div class="seg"><button data-ty="income" class="on">ආදායම (+)</button><button data-ty="expense">වියදම (-)</button></div>
-<label>දිනය</label><input type="date" id="f-date">
-<label>මුදල (Rs.)</label><input type="number" id="f-amt" inputmode="decimal" min="0">
-<label>වර්ගය</label><select id="f-cat"></select>
-<div id="g-staff" class="hide"><label>ස්ටාෆ් නම</label><input id="f-staff" list="staffnames"><datalist id="staffnames"></datalist></div>
-<div id="g-cust" class="hide">
-<label>පාරිභෝගික නම</label><input id="f-name" list="custnames"><datalist id="custnames"></datalist>
-<label>දුරකථන</label><input id="f-phone" inputmode="tel">
-</div>
-<div id="g-veh" class="hide"><label>වාහන අංකය</label><input id="f-veh" list="vehs"><datalist id="vehs"></datalist></div>
-<label>සටහන</label><textarea id="f-note" rows="2"></textarea>
-<button class="save" id="save">සේව් කරන්න</button>
-</div></section>
-
-<section id="v-cust" class="hide"><div class="card"><input id="q" placeholder="නම / අංකය / දුරකථනය සොයන්න"><div id="custlist" style="margin-top:8px"></div></div></section>
-<section id="v-rec" class="hide"><div class="card"><div id="reclist"></div></div><div class="card"><h3>Backup</h3><div class="k" style="margin-bottom:8px">දත්ත ගබඩා වෙන්නේ මේ ෆෝන් එකේ පමණයි. සතියකට වරක් backup එකක් ගන්න.</div>
-<button class="save" id="bk" style="margin-top:0">Backup ගන්න</button>
-<label>Backup එකකින් ප්‍රතිස්ථාපනය</label><input type="file" id="rs" accept=".json,application/json"></div></section>
-</div>
-<script>window.dbReady=new Promise(r=>{window._res=r});
-const $=s=>document.querySelector(s);
-const CATS={income:[["repair","අලුත්වැඩියා / සර්විස්"],["parts_sale","කොටස් විකිණීම"],["other_in","වෙනත් ආදායම"]],
-expense:[["wage","ස්ටාෆ් දවස් පඩි"],["food","ස්ටාෆ් කෑම බීම"],["parts","වාහන කොටස් (කස්ටමර් වැඩ)"],["ownveh","අනිත් වාහන වලට (වෙනත් වාහන)"],["bills","කුලී / විදුලි / වතුර"],["other_out","වෙනත් වියදම්"]]};
-const NAME={};Object.values(CATS).flat().forEach(([k,n])=>NAME[k]=n);
-const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
-const fmt=n=>"Rs. "+Math.round(n).toLocaleString("en-US");
-const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const obj=d=>Object.assign({id:d.id},typeof d.data==="function"?d.data():d.data);
-let db=null,entries=[],customers=[],type="income",tab="home",month=today().slice(0,7);
-
-function setStatus(t){const s=$("#status");s.textContent=t;s.classList.toggle("hide",!t)}
-$("#month").value=month;$("#f-date").value=today();
-$("#month").onchange=e=>{month=e.target.value||month;render()};
-$("#nav").onclick=e=>{const t=e.target.dataset.t;if(!t)return;tab=t;
- document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
- ["home","add","cust","rec"].forEach(x=>$("#v-"+x).classList.toggle("hide",x!==t));render()};
-document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{type=b.dataset.ty;
- document.querySelectorAll(".seg button").forEach(x=>x.classList.toggle("on",x===b));fillCats()});
-function fillCats(){$("#f-cat").innerHTML=CATS[type].map(([k,n])=>`<option value="${k}">${n}</option>`).join("");toggles()}
-function toggles(){const c=$("#f-cat").value;
- $("#g-staff").classList.toggle("hide",c!=="wage");
- $("#g-cust").classList.toggle("hide",type!=="income");
- $("#g-veh").classList.toggle("hide",!(type==="income"||c==="parts"||c==="ownveh"))}
-$("#f-cat").onchange=toggles;fillCats();
-$("#q").oninput=render;
-
-function hash(s){let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))|0;return "c"+(h>>>0).toString(36)}
-async function save(){
- if(!db){alert("දත්ත ගබඩාවට සම්බන්ධ වී නැත");return}
- const amt=parseFloat($("#f-amt").value);if(!(amt>0)){alert("මුදල ඇතුළත් කරන්න");return}
- const cat=$("#f-cat").value,date=$("#f-date").value||today();
- const e={type,cat,amount:amt,date,note:$("#f-note").value.trim(),ts:Date.now()};
- const veh=$("#f-veh").value.trim().toUpperCase();if(veh)e.vehicle=veh;
- if(cat==="wage")e.staff=$("#f-staff").value.trim()||"නම නැත";
- const name=$("#f-name").value.trim(),phone=$("#f-phone").value.trim();
- if(type==="income"){e.customer=name;e.phone=phone}
- try{
-  await db.collection("entries").add(e);
-  if(type==="income"&&(veh||phone||name)){
-   const key=veh||phone||name,id=hash(key.toLowerCase()),old=customers.find(c=>c.id===id)||{};
-   await db.doc("customers/"+id).set({name:name||old.name||"",phone:phone||old.phone||"",vehicle:veh||old.vehicle||"",
-    visits:(old.visits||0)+1,total:(old.total||0)+amt,last:date});
-  }
-  ["f-amt","f-note","f-staff","f-name","f-phone","f-veh"].forEach(i=>$("#"+i).value="");
-  setStatus("සේව් විය ✓");setTimeout(()=>setStatus(""),2000);
- }catch(err){alert("සේව් කළ නොහැක. (View only ගිණුමකින් ලිවිය නොහැක.)")}
-}
-$("#save").onclick=save;
-async function delEntry(id){if(confirm("මේ වාර්තාව මකන්නද?")){try{await db.doc("entries/"+id).delete()}catch(e){alert("මකන්න අවසර නැත")}}}
-window.delEntry=delEntry;
-
-function render(){
- const me=entries.filter(e=>(e.date||"").slice(0,7)===month);
- const inc=me.filter(e=>e.type==="income").reduce((a,e)=>a+e.amount,0);
- const exp=me.filter(e=>e.type==="expense");const out=exp.reduce((a,e)=>a+e.amount,0);
- $("#s-in").textContent=fmt(inc);$("#s-out").textContent=fmt(out);
- const pf=$("#s-pf");pf.textContent=fmt(inc-out);pf.className="v "+(inc-out>=0?"ok":"bad");
- const by={};exp.forEach(e=>by[e.cat]=(by[e.cat]||0)+e.amount);
- $("#cats").innerHTML=Object.keys(by).length?Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,v])=>
-  `<div style="margin-bottom:8px"><div class="row" style="padding:0;border:0"><span>${esc(NAME[k]||k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${out?v/out*100:0}%"></i></div></div>`).join(""):'<div class="k">වියදම් නැත</div>';
- const w=exp.filter(e=>e.cat==="wage"),sm={};w.forEach(e=>{const s=sm[e.staff]||(sm[e.staff]={n:0,t:0});s.n++;s.t+=e.amount});
- const names=Object.keys(sm);
- $("#staff").innerHTML=`<div class="row"><span>පඩි ලැබූ ස්ටාෆ් ගණන</span><b>${names.length}</b></div><div class="row"><span>මුළු පඩි</span><b>${fmt(by.wage||0)}</b></div><div class="row"><span>කෑම බීම</span><b>${fmt(by.food||0)}</b></div>`
-  +names.map(n=>`<div class="row"><span>${esc(n)} <span class="k">(දින ${sm[n].n})</span></span><b>${fmt(sm[n].t)}</b></div>`).join("");
- $("#staffnames").innerHTML=[...new Set(entries.filter(e=>e.staff).map(e=>e.staff))].map(n=>`<option value="${esc(n)}">`).join("");
- $("#custnames").innerHTML=customers.filter(c=>c.name).map(c=>`<option value="${esc(c.name)}">`).join("");
- $("#vehs").innerHTML=customers.filter(c=>c.vehicle).map(c=>`<option value="${esc(c.vehicle)}">`).join("");
- const q=$("#q").value.trim().toLowerCase();
- const cl=customers.filter(c=>!q||[c.name,c.phone,c.vehicle].join(" ").toLowerCase().includes(q)).sort((a,b)=>(b.last||"").localeCompare(a.last||""));
- $("#custlist").innerHTML=cl.length?cl.map(c=>`<div class="row"><div><b>${esc(c.name||"නම නැත")}</b><div class="k">${esc(c.vehicle||"")} ${esc(c.phone||"")}</div></div><div style="text-align:right"><b>${fmt(c.total||0)}</b><div class="k">${c.visits||0} වතාවක් · ${esc(c.last||"")}</div></div></div>`).join(""):'<div class="k">පාරිභෝගිකයෝ නැත. ආදායමක් එකතු කරද්දී ඔටෝ සේව් වේ.</div>';
- const rl=[...me].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.ts||0)-(a.ts||0));
- $("#reclist").innerHTML=rl.length?rl.map(e=>`<div class="row"><div><b>${esc(NAME[e.cat]||e.cat)}</b> <span class="k">${esc(e.date)}</span><div class="k">${esc([e.staff,e.customer,e.vehicle,e.note].filter(Boolean).join(" · "))}</div></div><div style="text-align:right"><b class="${e.type==="income"?"ok":"bad"}">${e.type==="income"?"+":"-"}${fmt(e.amount)}</b><br><button class="del" onclick="delEntry('${e.id}')">මකන්න</button></div></div>`).join(""):'<div class="k">මේ මාසයේ වාර්තා නැත</div>';
-}
-
-(async()=>{
- const t=setTimeout(()=>setStatus("දත්ත ගබඩාවට තවම සම්බන්ධ වී නැත. පසුව බලන්න."),10000);
- try{db=await window.dbReady}catch(e){db=null}
- if(!db){clearTimeout(t);setStatus("සම්බන්ධ වීමට claude.ai හි sign in වී ලින්ක් එක විවෘත කරන්න.");return}
- let got=0;const ok=()=>{if(++got>=2){clearTimeout(t);setStatus("")}};
- const er=()=>{clearTimeout(t);setStatus("දත්ත කියවීමේ දෝෂයක්")};
- db.collection("entries").onSnapshot(s=>{entries=s.docs.map(obj);ok();render()},er);
- db.collection("customers").onSnapshot(s=>{customers=s.docs.map(obj);ok();render()},er);
-})();
-render();
-</script><script>
-(()=>{
+#m{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:40}
+#m.on{display:flex}
+.sh{background:var(--card);width:100%;max-width:720px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.chip{flex:1;padding:9px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:10px;font:inherit;cursor:pointer}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--bd);color:var(--mut)}
+.row b{white-space:nowrap}
+</style></head><body>
+<datalist id="dl_cust"></datalist><datalist id="dl_veh"></datalist>
+<div id="login" style="display:none"><form id="lf"><div class="logo">SM</div><h2>SHIVA MOTORS</h2><label>PIN</label><input type="password" id="lp" inputmode="numeric" autocomplete="off"><button class="save" type="submit">ඇතුළු වන්න</button><div id="lerr"></div></form></div>
+<div class="wrap"><header class="top"><div class="logo">SM</div><div><h1>SHIVA <span>MOTORS</span></h1><div class="sub">Garage Accounts &amp; Customer Records</div></div></header><div id="app"></div></div>
+<nav id="nav">
+<button data-t="home"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>සාරාංශය</span></button>
+<button data-t="jobs"><svg viewBox="0 0 24 24"><path d="M9 4h6v3H9zM7 6H5v15h14V6h-2M8 12h8M8 16h5"/></svg><span>වැඩ</span></button>
+<button data-t="staff"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-4 3.2-6 6.5-6s6 2 6.5 6M17 11a3 3 0 100-6M18 14c2.2.4 3.5 2.3 3.8 5"/></svg><span>ස්ටාෆ්</span></button>
+<button data-t="exp"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3zM3 7l3-3h12l3 3M16 13h2"/></svg><span>වියදම්</span></button>
+<button data-t="more"><svg viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></svg><span>තව</span></button></nav>
+<div id="m"></div>
+<script>
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
-const K="shiva-motors-v1";let store={};
-try{store=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}
-const subs={},uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const persist=()=>{try{localStorage.setItem(K,JSON.stringify(store))}catch(e){alert("ෆෝන් එකේ ගබඩා කළ නොහැකි විය. Storage පිරී ඇත.")}};
-const snap=n=>({docs:Object.entries(store[n]||{}).map(([id,d])=>({id,data:()=>d}))});
-const fire=n=>(subs[n]||[]).forEach(f=>f(snap(n)));
-const put=(n,id,d)=>{(store[n]=store[n]||{})[id]=d;persist();fire(n)};
-window._res({
- collection:n=>({add:async d=>put(n,uid(),d),onSnapshot:f=>{(subs[n]=subs[n]||[]).push(f);setTimeout(()=>f(snap(n)));return()=>{}}}),
- doc:p=>{const[n,id]=p.split("/");return{set:async d=>put(n,id,d),delete:async()=>{if(store[n])delete store[n][id];persist();fire(n)}}}
-});
-document.getElementById("bk").onclick=()=>{const b=new Blob([JSON.stringify(store)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="shiva-motors-backup-"+today()+".json";a.click()};
-document.getElementById("rs").onchange=async e=>{const f=e.target.files[0];if(!f)return;
- try{const d=JSON.parse(await f.text());if(!d||typeof d!=="object"||Array.isArray(d))throw 0;
-  if(!confirm("දැනට ඇති දත්ත මේ backup එකෙන් ප්‍රතිස්ථාපනය වේ. ඉදිරියට යන්නද?"))return;
-  store=d;persist();["entries","customers"].forEach(fire)}catch(x){alert("වලංගු backup ෆයිල් එකක් නෙවෙයි")}e.target.value=""};
-})();
-</script>
-</body></html>
+const $=s=>document.querySelector(s),esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const fmt=n=>"Rs. "+Math.round(n||0).toLocaleString("en-US"),uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const K="shiva-motors-v2",CATS={parts:"වාහන කොටස්",food:"ස්ටාෆ් කෑම බීම",wage:"ස්ටාෆ් පඩි / ඇඩ්වාන්ස්",bills:"කුලී / විදුලි / වතුර",other:"වෙනත්",draw:"අයිතිකරුගේ ගැනීම් (අනිත් වාහන / ගෙදර)"};
+let S={};try{S=JSON.parse(localStorage.getItem(K))||{}}catch(e){}
+["jobs","exp","staff","att"].forEach(k=>S[k]=S[k]||{});S.pin=S.pin||"";
+let M=today().slice(0,7),T="home",Q="";
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert("ෆෝන් එකේ ගබඩා කළ නොහැකි විය. Storage පිරී ඇත.")}};
+const L=c=>Object.entries(S[c]).map(([id,v])=>({id,...v}));
+const put=(c,id,v)=>{S[c][id||uid()]=v;save();R()},rm=(c,id)=>{delete S[c][id];save();R()};
+const paid=j=>(j.pays||[]).reduce((a,p)=>a+p.a,0),inM=d=>(d||"").slice(0,7)===M;
+const cost=id=>L("exp").filter(e=>e.job===id).reduce((a,e)=>a+e.amount,0)+L("att").filter(a=>a.job===id).reduce((a,x)=>a+x.work*((S.staff[x.staff]||{}).rate||0),0);
+const byNew=(a,b)=>(b.date||"").localeCompare(a.date||"");
+const jobOpts=()=>[["","—"],...L("jobs").sort(byNew).slice(0,80).map(j=>[j.id,(j.veh||"")+" "+(j.cust||"")])];
+const staffOpts=()=>[["","—"],...L("staff").map(s=>[s.id,s.name])];
+function sheet(h){const m=$("#m");m.innerHTML='<div class="sh">'+h+"</div>";m.classList.add("on")}
+const close=()=>$("#m").classList.remove("on");
+$("#m").onclick=e=>{if(e.target.id==="m")close()};
+function form(title,fs,v,ok,del){
+ sheet(`<h3>${title}</h3>`+fs.map(f=>`<label>${f.l}</label>`+(f.t==="select"?`<select id="f_${f.k}">${f.o.map(([a,b])=>`<option value="${esc(a)}">${esc(b)}</option>`).join("")}</select>`:`<input id="f_${f.k}" type="${f.t||"text"}"${f.list?` list="${f.list}"`:""}${f.t==="number"?' inputmode="decimal"':""}>`)).join("")+`<button class="save" id="fo">සේව් කරන්න</button>${del?'<button class="del" id="fd" style="width:100%;margin-top:10px">මකන්න</button>':""}<button class="del" id="fc" style="width:100%;margin-top:6px;color:var(--mut)">අවලංගු</button>`);
+ fs.forEach(f=>{$("#f_"+f.k).value=v[f.k]??""});
+ $("#fo").onclick=()=>{const o={};for(const f of fs){let x=$("#f_"+f.k).value.trim();if(f.t==="number")x=x===""?0:parseFloat(x);o[f.k]=x}if(ok(o)!==false)close()};
+ $("#fc").onclick=close;if(del)$("#fd").onclick=()=>{if(confirm("මකන්නද?")){del();close()}};
+}
+function staffStats(){return L("staff").map(s=>{const at=L("att").filter(a=>a.staff===s.id),px=L("exp").filter(e=>e.cat==="wage"&&e.staff===s.id);
+ return{...s,days:at.filter(a=>inM(a.date)).reduce((a,x)=>a+x.work,0),mpaid:px.filter(e=>inM(e.date)).reduce((a,x)=>a+x.amount,0),owed:at.reduce((a,x)=>a+x.work*s.rate,0)-px.reduce((a,x)=>a+x.amount,0)}})}
+const mo=()=>`<div class="card"><input type="month" value="${M}" onchange="M=this.value||M;R()"></div>`;
+
+function vHome(){
+ const inc=L("jobs").flatMap(j=>(j.pays||[]).filter(p=>inM(p.d))).reduce((a,p)=>a+p.a,0);
+ const ex=L("exp").filter(e=>inM(e.date)),by={};ex.forEach(e=>by[e.cat]=(by[e.cat]||0)+e.amount);
+ const draw=by.draw||0,out=Object.entries(by).filter(([k])=>k!=="draw").reduce((a,[,v])=>a+v,0),pf=inc-out;
+ const dues=L("jobs").map(j=>({...j,bal:j.charged-paid(j)})).filter(j=>j.bal>0).sort((a,b)=>b.bal-a.bal),dt=dues.reduce((a,j)=>a+j.bal,0);
+ const ss=staffStats();
+ return mo()+`<div class="card"><div class="grid"><div><div class="k">ලැබුණු ආදායම</div><div class="v">${fmt(inc)}</div></div><div><div class="k">වියදම</div><div class="v">${fmt(out)}</div></div><div><div class="k">ඇත්ත ලාභය</div><div class="v ${pf>=0?"ok":"bad"}">${fmt(pf)}</div></div></div>
+ <div class="row" style="margin-top:8px"><span>අයිතිකරු ගත්තේ (අනිත් වාහන / ගෙදර)</span><b>${fmt(draw)}</b></div><div class="row"><span>ව්‍යාපාරයේ ඉතුරු</span><b class="${pf-draw>=0?"ok":"bad"}">${fmt(pf-draw)}</b></div></div>
+ <div class="card"><h3>වියදම් බෙදීම</h3>`+(ex.length?Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div style="margin-bottom:8px"><div class="row" style="padding:0;border:0"><span>${CATS[k]}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v/(out+draw)*100}%"></i></div></div>`).join(""):'<div class="k">වියදම් නැත</div>')+`</div>
+ <div class="card"><h3>ස්ටාෆ්</h3><div class="row"><span>පඩි ලැබූ ගණන</span><b>${ss.filter(s=>s.mpaid>0).length} / ${ss.length}</b></div><div class="row"><span>මුළු පඩි</span><b>${fmt(by.wage)}</b></div><div class="row"><span>කෑම බීම</span><b>${fmt(by.food)}</b></div></div>
+ <div class="card"><h3>ලැබිය යුතු මුදල්: ${fmt(dt)}</h3>`+(dues.slice(0,6).map(j=>`<div class="row" onclick="A.job('${j.id}')"><span>${esc(j.veh)} ${esc(j.cust)}</span><b class="bad">${fmt(j.bal)}</b></div>`).join("")||'<div class="k">ණය නැත</div>')+"</div>"}
+
+function jobRows(){const q=Q.toLowerCase(),js=L("jobs").filter(j=>!q||[j.veh,j.cust,j.phone,j.desc].join(" ").toLowerCase().includes(q)).sort(byNew);
+ return js.length?js.map(j=>{const b=j.charged-paid(j);return`<div class="row" onclick="A.job('${j.id}')" style="cursor:pointer"><div><b>${esc(j.veh||"—")}</b> ${esc(j.cust)}<div class="k">${esc(j.desc)} · ${j.date}${j.status==="open"?" · ක්‍රියාත්මක":""}</div></div><div style="text-align:right"><b>${fmt(j.charged)}</b><div class="k ${b>0?"bad":"ok"}">${b>0?"ඉතුරු "+fmt(b):"ගෙවා ඇත"}</div><div class="k">ලාභ ${fmt(j.charged-cost(j.id))}</div></div></div>`}).join(""):'<div class="k">වැඩ නැත. + බොත්තමෙන් එකතු කරන්න.</div>'}
+const vJobs=()=>`<div class="card"><input placeholder="වාහන අංකය / නම / දුරකථන සොයන්න" value="${esc(Q)}" oninput="Q=this.value;$('#jl').innerHTML=jobRows()"><button class="save" onclick="A.newJob()">+ අලුත් වැඩක්</button></div><div class="card" id="jl">${jobRows()}</div>`;
+
+function vStaff(){return`<div class="card"><button class="save" style="margin:0" onclick="A.staff()">+ ස්ටාෆ් සාමාජිකයෙක්</button></div>`+mo()+staffStats().map(s=>`<div class="card"><div class="row" style="border:0;padding:0"><b onclick="A.staff('${s.id}')">${esc(s.name)}</b><span class="k">දිනකට ${fmt(s.rate)}</span></div><div class="grid" style="margin-top:8px"><div><div class="k">දින</div><div class="v">${s.days}</div></div><div><div class="k">ගෙවූ</div><div class="v">${fmt(s.mpaid)}</div></div><div><div class="k">${s.owed<0?"අත්තිකාරම්":"ඉතුරු"}</div><div class="v ${s.owed>0?"bad":"ok"}">${fmt(Math.abs(s.owed))}</div></div></div><div style="display:flex;gap:6px;margin-top:10px"><button class="chip" onclick="A.att('${s.id}')">පැමිණීම</button><button class="chip" onclick="A.spay('${s.id}')">ගෙවීම</button><button class="chip" onclick="A.sdet('${s.id}')">විස්තර</button></div></div>`).join("")}
+
+const vExp=()=>`<div class="card"><button class="save" style="margin:0" onclick="A.exp()">+ වියදමක්</button></div>`+mo()+`<div class="card">`+(L("exp").filter(e=>inM(e.date)).sort(byNew).map(e=>`<div class="row" onclick="A.exp('${e.id}')" style="cursor:pointer"><div><b>${CATS[e.cat]}</b><div class="k">${e.date} ${esc((S.staff[e.staff]||{}).name||"")} ${esc(e.note)}</div></div><b class="bad">${fmt(e.amount)}</b></div>`).join("")||'<div class="k">මේ මාසයේ වියදම් නැත</div>')+"</div>";
+
+function vMore(){const c={};L("jobs").forEach(j=>{const k=j.veh||j.phone||j.cust,o=c[k]||(c[k]={n:j.cust,v:j.veh,p:j.phone,t:0,b:0,c:0});o.t+=j.charged;o.b+=j.charged-paid(j);o.c++});
+ const lim=new Date(Date.now()+14*864e5).toISOString().slice(0,10),sv=L("jobs").filter(j=>j.next&&j.next<=lim).sort((a,b)=>a.next.localeCompare(b.next));
+ return`<div class="card"><h3>සර්විස් මතක් කිරීම (දින 14ක් ඇතුළත)</h3>`+(sv.map(j=>`<div class="row"><div><b>${esc(j.veh)}</b> ${esc(j.cust)}<div class="k">${j.next}</div></div><button class="chip" style="flex:none" onclick="A.wa('${j.id}','svc')">WhatsApp</button></div>`).join("")||'<div class="k">නැත</div>')+`</div>
+ <div class="card"><h3>පාරිභෝගිකයෝ (${Object.keys(c).length})</h3>`+(Object.values(c).sort((a,b)=>b.t-a.t).map(o=>`<div class="row" onclick="Q='${esc(o.v||o.n)}';T='jobs';R()"><div><b>${esc(o.n||"නම නැත")}</b><div class="k">${esc(o.v)} ${esc(o.p)}</div></div><div style="text-align:right"><b>${fmt(o.t)}</b><div class="k ${o.b>0?"bad":""}">${o.c} වතාව${o.b>0?" · ඉතුරු "+fmt(o.b):""}</div></div></div>`).join("")||'<div class="k">නැත</div>')+`</div>
+ <div class="card"><h3>මෙවලම්</h3><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip" onclick="A.csv()">Excel (CSV)</button><button class="chip" onclick="A.bk()">Backup</button><button class="chip" onclick="A.pin()">${S.pin?"PIN වෙනස් / ඉවත්":"PIN දාන්න"}</button></div>
+ <label>Backup එකකින් ප්‍රතිස්ථාපනය</label><input type="file" accept=".json" onchange="A.rs(this)"><div class="k" style="margin-top:8px">දත්ත ගබඩා වන්නේ මේ ෆෝන් එකේ පමණි. සතියකට වරක් Backup ගන්න.</div></div>`}
+
+const A={};
+const af=()=>{const v=$("#f_veh").value.trim().toUpperCase(),n=$("#f_cust").value.trim(),p=L("jobs").filter(j=>(v&&j.veh===v)||(n&&j.cust===n)).sort(byNew)[0];if(p)["veh","cust","phone"].forEach(k=>{if(!$("#f_"+k).value)$("#f_"+k).value=p[k]||""})};
+const jf=n=>[{k:"date",l:"දිනය",t:"date"},{k:"veh",l:"වාහන අංකය",list:"dl_veh"},{k:"cust",l:"පාරිභෝගික නම",list:"dl_cust"},{k:"phone",l:"දුරකථන",t:"tel"},{k:"desc",l:"වැඩේ විස්තරය"},{k:"charged",l:"වැඩේ මුළු මිල (Rs.)",t:"number"},...(n?[{k:"paid",l:"දැන් ගෙවූ මුදල (Rs.)",t:"number"}]:[]),{k:"next",l:"ඊළඟ සර්විස් දිනය (අවශ්‍ය නම්)",t:"date"},{k:"status",l:"තත්ත්වය",t:"select",o:[["open","ක්‍රියාත්මක"],["done","අවසන්"]]}];
+A.newJob=()=>{form("අලුත් වැඩක්",jf(1),{date:today(),status:"open"},o=>{if(!o.veh&&!o.cust){alert("වාහන අංකය හෝ නම ඇතුළත් කරන්න");return false}
+ o.veh=o.veh.toUpperCase();const pays=o.paid>0?[{d:o.date,a:o.paid}]:[];delete o.paid;put("jobs",null,{...o,pays})});$("#f_veh").onchange=af;$("#f_cust").onchange=af};
+A.editJob=id=>form("වැඩය සංස්කරණය",jf(0),S.jobs[id],o=>{o.veh=o.veh.toUpperCase();put("jobs",id,{...S.jobs[id],...o});A.job(id);return false},()=>rm("jobs",id));
+A.job=id=>{const j=S.jobs[id];if(!j)return;const b=j.charged-paid(j),ex=L("exp").filter(e=>e.job===id),lb=L("att").filter(a=>a.job===id).reduce((a,x)=>a+x.work*((S.staff[x.staff]||{}).rate||0),0),pc=ex.reduce((a,e)=>a+e.amount,0);
+ sheet(`<h3>${esc(j.veh)} · ${esc(j.cust)}</h3><div class="k">${esc(j.phone)} · ${esc(j.desc)}</div>
+ <div class="grid" style="margin:10px 0"><div><div class="k">මිල</div><div class="v">${fmt(j.charged)}</div></div><div><div class="k">ගෙවූ</div><div class="v ok">${fmt(paid(j))}</div></div><div><div class="k">ඉතුරු</div><div class="v ${b>0?"bad":"ok"}">${fmt(b)}</div></div></div>
+ <div class="row"><span>කොටස් වියදම</span><b>${fmt(pc)}</b></div><div class="row"><span>ගෝලයන්ගේ පඩි (පැමිණීමෙන්)</span><b>${fmt(lb)}</b></div><div class="row"><span>මේ වැඩේ ලාභය</span><b class="${j.charged-pc-lb>=0?"ok":"bad"}">${fmt(j.charged-pc-lb)}</b></div>
+ <h3 style="margin-top:12px">ගෙවීම්</h3>`+((j.pays||[]).map((p,i)=>`<div class="row"><span>${p.d}</span><b>${fmt(p.a)}</b><button class="del" onclick="A.delPay('${id}',${i})">✕</button></div>`).join("")||'<div class="k">ගෙවීම් නැත</div>')+
+ `<div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap"><button class="chip" onclick="A.pay('${id}')">+ ගෙවීමක්</button><button class="chip" onclick="A.wa('${id}','bal')">WhatsApp</button><button class="chip" onclick="A.editJob('${id}')">සංස්කරණය</button><button class="chip" onclick="close()">වසන්න</button></div>`)};
+A.pay=id=>{const j=S.jobs[id];form("ගෙවීමක්",[{k:"d",l:"දිනය",t:"date"},{k:"a",l:"මුදල (Rs.)",t:"number"}],{d:today(),a:Math.max(0,j.charged-paid(j))},o=>{if(!(o.a>0)){alert("මුදල ඇතුළත් කරන්න");return false}j.pays=(j.pays||[]).concat([{d:o.d,a:o.a}]);save();R();A.job(id);return false})};
+A.delPay=(id,i)=>{if(confirm("මකන්නද?")){S.jobs[id].pays.splice(i,1);save();R();A.job(id)}};
+A.wa=(id,k)=>{const j=S.jobs[id];let p=String(j.phone||"").replace(/\D/g,"");if(!p){alert("දුරකථන අංකයක් නැත");return}if(p[0]==="0")p="94"+p.slice(1);
+ const t=k==="svc"?`ආයුබෝවන් ${j.cust}, ${j.veh} වාහනයේ ඊළඟ සර්විස් එක ${j.next} පමණ වේ. SHIVA MOTORS`:`ආයුබෝවන් ${j.cust}, ${j.veh} වාහනයේ වැඩ සඳහා ඉතුරු ගෙවීම ${fmt(j.charged-paid(j))}. ස්තූතියි. SHIVA MOTORS`;
+ window.open("https://wa.me/"+p+"?text="+encodeURIComponent(t),"_blank")};
+A.staff=id=>form(id?"ස්ටාෆ් සංස්කරණය":"අලුත් ස්ටාෆ් සාමාජිකයෙක්",[{k:"name",l:"නම"},{k:"rate",l:"දවසක පඩිය (Rs.)",t:"number"}],id?S.staff[id]:{},o=>{if(!o.name){alert("නම ඇතුළත් කරන්න");return false}put("staff",id,o)},id?()=>rm("staff",id):null);
+A.att=id=>form("පැමිණීම - "+S.staff[id].name,[{k:"date",l:"දිනය",t:"date"},{k:"work",l:"වැඩ කළ කාලය",t:"select",o:[["1","සම්පූර්ණ දවස"],["0.5","අඩ දවස"]]},{k:"job",l:"වැඩ කළ වාහනය (අවශ්‍ය නම්)",t:"select",o:jobOpts()}],{date:today(),work:"1"},o=>{put("att",null,{date:o.date,staff:id,work:parseFloat(o.work),job:o.job})});
+A.spay=id=>form("ගෙවීම / ඇඩ්වාන්ස් - "+S.staff[id].name,[{k:"date",l:"දිනය",t:"date"},{k:"amount",l:"මුදල (Rs.)",t:"number"},{k:"note",l:"සටහන"}],{date:today()},o=>{if(!(o.amount>0)){alert("මුදල ඇතුළත් කරන්න");return false}put("exp",null,{...o,cat:"wage",staff:id})});
+A.sdet=id=>{const r=[...L("att").filter(a=>a.staff===id&&inM(a.date)).map(a=>({...a,c:"att"})),...L("exp").filter(e=>e.staff===id&&e.cat==="wage"&&inM(e.date)).map(e=>({...e,c:"exp"}))].sort(byNew);
+ sheet(`<h3>${esc(S.staff[id].name)} · ${M}</h3>`+(r.map(x=>`<div class="row"><span>${x.date} ${x.c==="att"?(x.work===1?"දවස":"අඩ දවස"):"ගෙවීම"}</span><b>${x.c==="att"?fmt(x.work*S.staff[id].rate):fmt(x.amount)}</b><button class="del" onclick="A.drec('${x.c}','${x.id}','${id}')">✕</button></div>`).join("")||'<div class="k">වාර්තා නැත</div>')+`<button class="chip" style="width:100%;margin-top:10px" onclick="close()">වසන්න</button>`)};
+A.drec=(c,id,s)=>{if(confirm("මකන්නද?")){rm(c,id);A.sdet(s)}};
+A.exp=id=>form(id?"වියදම සංස්කරණය":"අලුත් වියදමක්",[{k:"date",l:"දිනය",t:"date"},{k:"cat",l:"වර්ගය",t:"select",o:Object.entries(CATS)},{k:"amount",l:"මුදල (Rs.)",t:"number"},{k:"job",l:"වාහනය / වැඩේ (කොටස් සඳහා)",t:"select",o:jobOpts()},{k:"staff",l:"ස්ටාෆ් (පඩි සඳහා)",t:"select",o:staffOpts()},{k:"note",l:"සටහන"}],id?S.exp[id]:{date:today(),cat:"parts"},o=>{if(!(o.amount>0)){alert("මුදල ඇතුළත් කරන්න");return false}put("exp",id,o)},id?()=>rm("exp",id):null);
+const dl=(b,n)=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;a.click()};
+A.bk=()=>dl(new Blob([JSON.stringify(S)],{type:"application/json"}),"shiva-motors-backup-"+today()+".json");
+A.rs=async el=>{const f=el.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!d.jobs||!d.exp)throw 0;if(!confirm("දැනට ඇති දත්ත මේ backup එකෙන් ප්‍රතිස්ථාපනය වේ. ඉදිරියට යන්නද?"))return;S=d;["jobs","exp","staff","att"].forEach(k=>S[k]=S[k]||{});save();R()}catch(x){alert("වලංගු backup ෆයිල් එකක් නෙවෙයි")}el.value=""};
+A.csv=()=>{const r=[["type","date","vehicle","customer","phone","detail","amount"]];L("jobs").forEach(j=>{r.push(["job",j.date,j.veh,j.cust,j.phone,j.desc,j.charged]);(j.pays||[]).forEach(p=>r.push(["payment",p.d,j.veh,j.cust,j.phone,"",p.a]))});
+ L("exp").forEach(e=>r.push(["expense",e.date,"","","",CATS[e.cat]+" "+((S.staff[e.staff]||{}).name||"")+" "+(e.note||""),e.amount]));L("att").forEach(a=>r.push(["staff-day",a.date,"","","",(S.staff[a.staff]||{}).name,a.work*((S.staff[a.staff]||{}).rate||0)]));
+ dl(new Blob(["\ufeff"+r.map(x=>x.map(c=>'"'+String(c==null?"":c).replace(/"/g,'""')+'"').join(",")).join("\n")],{type:"text/csv"}),"shiva-motors-"+today()+".csv")};
+A.pin=()=>{const p=prompt(S.pin?"අලුත් PIN එක (ඉවත් කිරීමට හිස්ව තබන්න)":"PIN එකක් (ඉලක්කම් 4ක්)");if(p===null)return;S.pin=p.trim();save();R()};
+
+function R(){$("#app").innerHTML=({home:vHome,jobs:vJobs,staff:vStaff,exp:vExp,more:vMore})[T]();
+ document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===T));
+ const u=a=>[...new Set(a.filter(Boolean))].map(x=>`<option value="${esc(x)}">`).join("");
+ $("#dl_cust").innerHTML=u(L("jobs").map(j=>j.cust));$("#dl_veh").innerHTML=u(L("jobs").map(j=>j.veh))}
+$("#nav").onclick=e=>{const t=e.target.dataset.t;if(t){T=t;R();scrollTo(0,0)}};
+if(S.pin){$("#login").style.display="grid";$("#lf").onsubmit=e=>{e.preventDefault();if($("#lp").value===S.pin)$("#login").style.display="none";else $("#lerr").textContent="PIN වැරදියි"}}
+R();
+</script></body></html>
